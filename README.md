@@ -62,3 +62,25 @@ I can expand both user and count the number of common discussion that has been a
 Can do some pre elaboration on the number of added discussions to give a prio to subcategories
 
 Then use the proportion coeficient (>=1) the multiply the cos sim founded
+
+
+
+
+
+Get parent category WIKI:
+
+​	 https://en.wikipedia.org/w/api.php?action=query&titles=Category:Italy&prop=categories 
+
+
+
+Snaturebbe l'utente e peggiora le prestazioni
+
+
+
+Important:
+
+ The key to summarization is conceptual similarity, not textual similarity. The same point may be made with 10 or 20 different metaphors, so the words may be different while the concepts are the same! 
+
+
+
+Anche la lingua il cambio lingua snaturerebbe l'utente

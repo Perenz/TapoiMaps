@@ -55,10 +55,14 @@ distRoger = cosine_dic(testDict, targets[2]['data'])
 '''
 
 dfTest = pd.DataFrame(testDict, index=['test'])
-dfEmma = pd.DataFrame(targets[0]['data'], index=['emma'])
-dfRoger = pd.DataFrame(targets[2]['data'], index=['roger'])
+dfEmma = pd.DataFrame(targets[0]['data'], index=['Emma'])
+dfMichelle =pd.DataFrame(targets[1]['data'], index=['Michelle'])
+dfTim = pd.DataFrame(targets[3]['data'], index=['Tim'])
+dfRoger = pd.DataFrame(targets[2]['data'], index=['Roger'])
 
-df = dfTest.append([dfEmma, dfRoger], sort=False).fillna(0)
+print('debug')
+
+df = dfTest.append([dfEmma, dfMichelle ,dfRoger, dfTim], sort=False).fillna(0)
 
 cosMat = cosine_similarity(df)
 
