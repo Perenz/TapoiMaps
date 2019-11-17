@@ -2,7 +2,7 @@ import json
 import os
 import pandas as pd
 from numpy import argmax, argmin
-from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
+from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances, pairwise_distances
 from sklearn.preprocessing import normalize
 
 
@@ -26,6 +26,15 @@ def getTargetsDF():
 
     return df.fillna(0)
 
+
+def metricFunc(x, y):
+        xTw = sum(x)
+        yTw = sum(y)
+
+        # **0.5 gives more importance to the fact that both cited the same topic instead of how much they had talked about it
+        # Problem: Longer profiles higher the similarity; it doesn't give value to different topic
+        dist = sum(min(x[i]/xTw, y[i]/yTw)**0.5 for i in range(len(x)))
+        return dist
 
 class similarityEvaluator():
     def __init__(self):
@@ -52,4 +61,14 @@ class similarityEvaluator():
         eucSim = eucMat[-1, :-1]
         minInd = argmin(eucSim)
         return totalDF.iloc[minInd].name, eucSim[minInd]
+
+    def computeNaiveDist(self, dfTest):
+        totalDF = self.targets.append(dfTest, sort=False).fillna(0)
+
+        #Give a function as parameter 'metric' 
+        naiveMat = pairwise_distances(totalDF, metric=metricFunc)
+        print(naiveMat)
+        naiveSim = naiveMat[-1, :-1]
+        minInd = argmax(naiveSim)
+        return totalDF.iloc[minInd].name, naiveSim[minInd]
 

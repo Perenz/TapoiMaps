@@ -84,3 +84,9 @@ Important:
 
 
 Anche la lingua il cambio lingua snaturerebbe l'utente
+
+
+
+Use HDF5 for better perfomances in file reading
+
+The operation of creating a single DF containing every target and the test creates a lot of column where both the analyzed vectors have 0 reference, there a lot of time is lost

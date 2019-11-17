@@ -36,4 +36,10 @@ def euclidean():
     id, simValue = evalu.computeEuclideanDist(pd.DataFrame(json, index=['test'])) 
     return jsonify({'id':id, 'value':simValue})
 
+@app.route('/naive', methods=['GET', 'POST'])
+def naive():
+    json = request.get_json(silent=True)
+    id, simValue = evalu.computeNaiveDist(pd.DataFrame(json, index=['test'])) 
+    return jsonify({'id':id, 'value':simValue})
+
 app.run()
