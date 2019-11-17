@@ -33,7 +33,7 @@ for file in os.listdir('./computedFiles'):
         
         targets.append({'name':file.split('.')[0], 'data':data})
 
-jsonFile = open('./targetFiles/testRoger.json')
+jsonFile = open('./computedFiles/michelle.json')
 jsonStr = jsonFile.read()
 testDict = json.loads(jsonStr)
 
@@ -59,6 +59,7 @@ dfEmma = pd.DataFrame(targets[0]['data'], index=['Emma'])
 dfMichelle =pd.DataFrame(targets[1]['data'], index=['Michelle'])
 dfTim = pd.DataFrame(targets[3]['data'], index=['Tim'])
 dfRoger = pd.DataFrame(targets[2]['data'], index=['Roger'])
+
 
 print('debug')
 
