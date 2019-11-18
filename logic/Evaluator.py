@@ -7,6 +7,7 @@ from sklearn.preprocessing import normalize
 
 
 def getTargetsDF():
+    targets = []
     df = pd.DataFrame()
     for file in os.listdir('./computedFiles'):
         if file.endswith('.json'):
@@ -21,20 +22,30 @@ def getTargetsDF():
             dfT = pd.DataFrame(data, index=[name])
 
             #print(dfT)
+            targets.append(dfT)
+            #df = df.append(dfT, sort=False)
 
-            df = df.append(dfT, sort=False)
-
-    return df.fillna(0)
+    return targets
 
 
 def metricFunc(x, y):
         xTw = sum(x)
         yTw = sum(y)
 
-        # **0.5 gives more importance to the fact that both cited the same topic instead of how much they had talked about it
+        # **2 gives more importance to the fact that both cited the same topic instead of how much they had talked about it
         # Problem: Longer profiles higher the similarity; it doesn't give value to different topic
-        dist = sum(min(x[i]/xTw, y[i]/yTw)**0.5 for i in range(len(x)))
+        dist = sum(min(x[i]/xTw, y[i]/yTw) for i in range(len(x)))
         return dist
+
+def weightedJaccard(x,y):
+    num=0
+    den=0
+    for i in range(len(x)):
+        num += min(x[i],y[i])
+        den += max(x[i],y[i])
+
+    return 1 - num/max(1,den)
+
 
 class similarityEvaluator():
     def __init__(self):
@@ -42,33 +53,43 @@ class similarityEvaluator():
         self.targets = getTargetsDF()
 
     def computeCosineSimilarity(self, dfTest):
-        totalDF = self.targets.append(dfTest, sort=False).fillna(0)
-        cosMat = cosine_similarity(totalDF)
-        print(cosMat)
+        cosMat = []
+        for i in range(len(self.targets)):
+            cosMat.append(cosine_similarity(dfTest.append(self.targets[i], sort=False).fillna(0))[0,1])
 
-        #print(dfTest)
-        cosSim = cosMat[-1, :-1]
+        #print(cosMat)
 
-        maxInd = argmax(cosSim)
-        return totalDF.iloc[maxInd].name, cosSim[maxInd]
+        ind = argmax(cosMat)
+        return self.targets[ind].iloc[0].name, cosMat[ind]
 
     def computeEuclideanDist(self, dfTest):
-        totalDF = self.targets.append(dfTest, sort=False).fillna(0)
-        normDf = normalize(totalDF)
-        eucMat = euclidean_distances(normDf)
-        print(eucMat)
+        eucMat = []
+        for i in range(len(self.targets)):
+            eucMat.append(euclidean_distances(normalize(dfTest.append(self.targets[i], sort=False).fillna(0)))[0,1])
 
-        eucSim = eucMat[-1, :-1]
-        minInd = argmin(eucSim)
-        return totalDF.iloc[minInd].name, eucSim[minInd]
+        #print(eucMat)
+
+        ind = argmin(eucMat)
+        return self.targets[ind].iloc[0].name, eucMat[ind]
+
 
     def computeNaiveDist(self, dfTest):
-        totalDF = self.targets.append(dfTest, sort=False).fillna(0)
+        naiveMat = []
+        for i in range(len(self.targets)):
+            naiveMat.append(pairwise_distances(dfTest.append(self.targets[i], sort=False).fillna(0), metric=metricFunc)[0,1])
 
-        #Give a function as parameter 'metric' 
-        naiveMat = pairwise_distances(totalDF, metric=metricFunc)
-        print(naiveMat)
-        naiveSim = naiveMat[-1, :-1]
-        minInd = argmax(naiveSim)
-        return totalDF.iloc[minInd].name, naiveSim[minInd]
+        #print(naiveMat)
+
+        ind = argmax(naiveMat)
+        return self.targets[ind].iloc[0].name, naiveMat[ind]
+
+    def computeJaccardDist(self, dfTest):
+        jacMat = []
+        for i in range(len(self.targets)):
+            jacMat.append(pairwise_distances(dfTest.append(self.targets[i], sort=False).fillna(0), metric=weightedJaccard)[0,1])
+
+        #print(jacMat)
+
+        ind = argmin(jacMat)
+        return self.targets[ind].iloc[0].name, jacMat[ind]
 
