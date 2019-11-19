@@ -45,7 +45,7 @@ Better accuracy can be obtained normalizing the vector x and y.
 
 I used a l2-normalization to keep the coefficients small
 
-
+So, for each profile, every topic reference counter was divided for the total number of references made by that user.
 
 
 #### Cons
@@ -129,7 +129,7 @@ So a pre-processing the given profiles can be useful and might improve our resul
 
 #### Wikipedia subpages
 
-Wikipedia structures its links in a hierarchy way which relates together pages to others which are linked in the main page. Those linked resources are considered "subordinate" to its host and they are linked as [[Parentpage/Subpage]]. It is possible to create sub-subpage. 				A clear use of this feature could be that of using MediaWiki API to find subpages of those the users we are comparing talked and add them to the profile description associated with the same number of references of the mainpage.
+Wikipedia structures its links in a hierarchy way which relates together pages to others which are linked in the main page. Those linked resources are considered "subordinate" to its host and they are linked as [[Parentpage/Subpage]]. It is possible to create sub-subpage. 				 A clear use of this feature could be that of using MediaWiki API to find subpages of those the users we are comparing talked and add them to the profile description associated with the same number of references of the mainpage.
 In this way two profiles that discussed similar, but different, topics could returns higher similarity coefficients given by the addition of the subpages to their profile overview if these new pages are "shared" by both account.
 
 We can immediately note that similarity coefficient can improve because the users discussed similar topics which were not caught by the base algorithms and it would increase the accuracy of the matching but, since every wikipedia page spreads a lot, with several "children", the coefficient could have risen because of the matching of a subpage obtained from two mainpages which are not related, at all.
@@ -146,6 +146,8 @@ A clear use for categories is that of finding categories which a user talk about
 
 This can result as a big improvement for the similarity coefficient  because the new algorithms would catch new matches that the older wouldn't get.  On the other hand this elaboration "removes" specific information from a user since the detailed data describing  a discussed and detailed topic is analyzed and new general insights are extracted. These general information should bring an improvement in the similarity coefficient which has been generated changing the specific nature of a profile.
 
+All of these can be used as a kind of conceptual similarity.
+
 So this pre-elaboration helps the matching algorithm but its use is recommended depending on the detail level we want for our profiles.
 
 
@@ -154,49 +156,18 @@ So this pre-elaboration helps the matching algorithm but its use is recommended 
 
 Everybody knows Wikipedia presents its pages with a language code and several pages are available in many languages. Thus two pages about the same topic but in different languages are related.
 
+Profiles contains Wikipedia's topics written not only in English but also in other languages so two profiles talking about the same topic but in a different language wouldn't add any value to the similarity coefficient.
+
+This can be solved using some Wikipedia APIs to retrieve the translation of every topic our users talked about, their addition to the user overview would decrease the distance between the two study subjects.
+
+On the other hand, the same problem mentioned before would be introduced; with the addition of other pages to the user profile we are adding a lot of information to the same.
+So we should ask ourselves if these changes are modifying the nature and the actual meaning of the user that we want to catch.
+
+Is it important to recognize as different two users who talk about the same topic but with different languages or is it the same for our application?
+
+Another problem this elaboration, as well as the others mentioned before, will introduce is that it would give to the algorithm more information that needs to be processed, thus the general complexity would increase and the performances would suffer it.
 
 
-
-
-
-
-Use a lemmatizer?
-
-Use subcategories to find more common topic discussion
-
-I can expand both user and count the number of common discussion that has been added
-
-Can do some pre elaboration on the number of added discussions to give a prio to subcategories
-
-Then use the proportion coeficient (>=1) the multiply the cos sim founded
-
-Snaturebbe l'utente e peggiora le prestazioni
-
-
-
-
-
-Get parent category WIKI:
-
-​	 https://en.wikipedia.org/w/api.php?action=query&titles=Category:Italy&prop=categories 
-
-
-
-Snaturebbe l'utente e peggiora le prestazioni
-
-Dato che wikipedia prevede molte parent categories 
-
-
-
-Important:
-
- The key to summarization is conceptual similarity, not textual similarity. The same point may be made with 10 or 20 different metaphors, so the words may be different while the concepts are the same! 
-
-Wikipedia parents can be used as a kinf of conceptual similarity
-
-
-
-Anche la lingua il cambio lingua snaturerebbe l'utente
 
 
 

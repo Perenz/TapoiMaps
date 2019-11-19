@@ -1,7 +1,8 @@
 import flask
 import os
-from flask import jsonify, Flask, request, make_response
+from flask import jsonify, Flask, request, make_response, abort
 import sys
+from flask_cors import CORS
 from timeit import default_timer as timer
 import pandas as pd
 sys.path.append('C:/Users/stefa/Desktop/U-Hopper/TapoiMaps')
@@ -10,6 +11,7 @@ from logic import Evaluator
 
 app = flask.Flask(__name__)
 app.config['DEBUG'] = True
+CORS(app)
 evalu = Evaluator.similarityEvaluator()
 
 #Use a class where define the simEvaluator
@@ -42,8 +44,7 @@ def handleError(error):
 def getErr():
     raise errorHandler("This is an error page", statusCode=404)
 
-@app.route('/', methods=['GET', 'POST'])
-@app.route('/cosine', methods=['GET', 'POST'])
+
 def cosine():
     start = timer()
 
@@ -54,7 +55,7 @@ def cosine():
     print('Time for cosine: ', round(end-start,4), ' in seconds')
     return jsonify({'id':id, 'value':round(simValue,3)})
 
-@app.route('/euclidean', methods=['GET', 'POST'])
+
 def euclidean():
     start = timer()
     json = request.get_json(silent=True)
@@ -65,7 +66,6 @@ def euclidean():
 
     return jsonify({'id':id, 'value':round(simValue,3)})
 
-@app.route('/naive', methods=['GET', 'POST'])
 def naive():
     start = timer()
     json = request.get_json(silent=True)
@@ -76,15 +76,30 @@ def naive():
 
     return jsonify({'id':id, 'value':round(simValue,3)})
 
-@app.route('/jaccard', methods=['GET', 'POST'])
 def jaccard():
     start = timer()
 
     json = request.get_json(silent=True)
+    print(json)
     
     id, simValue = evalu.computeJaccardDist(pd.DataFrame(json, index=['test'])) 
     end = timer()
     print('Time for jaccard: ', round(end-start,4), ' in seconds')
     return jsonify({'id':id, 'value':round(simValue,3)})
+
+@app.route('/similarity', methods=['GET', 'POST'])
+def similarity():
+    start = timer()
+    algorithm = request.args.get('alg', None)
+    if algorithm is None:
+        abort(404)
+    else:
+        if algorithm == '': abort(404)
+        if algorithm == 'jaccard': resp = jaccard()
+        if algorithm == 'cosine': resp = cosine()
+        if algorithm == 'euclidean': resp = euclidean()
+        if algorithm == 'naive': resp = naive()
+
+    return resp
 
 app.run()
