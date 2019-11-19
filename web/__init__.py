@@ -53,7 +53,7 @@ def cosine():
     
     end = timer()
     print('Time for cosine: ', round(end-start,4), ' in seconds')
-    return jsonify({'id':id, 'value':round(simValue,3)})
+    return jsonify({'id':id, 'metric':'Cosine', 'value':round(simValue,3)})
 
 
 def euclidean():
@@ -64,7 +64,7 @@ def euclidean():
     end = timer()
     print('Time for Euclidean: ', round(end-start,4), ' in seconds')
 
-    return jsonify({'id':id, 'value':round(simValue,3)})
+    return jsonify({'id':id,'metric':'Euclidean', 'value':round(simValue,3)})
 
 def naive():
     start = timer()
@@ -74,31 +74,32 @@ def naive():
     end = timer()
     print('Time for Naive: ', round(end-start,4), ' in seconds')
 
-    return jsonify({'id':id, 'value':round(simValue,3)})
+    return jsonify({'id':id,'metric':'Naive', 'value':round(simValue,3), })
 
 def jaccard():
     start = timer()
 
     json = request.get_json(silent=True)
-    print(json)
     
     id, simValue = evalu.computeJaccardDist(pd.DataFrame(json, index=['test'])) 
     end = timer()
     print('Time for jaccard: ', round(end-start,4), ' in seconds')
-    return jsonify({'id':id, 'value':round(simValue,3)})
+    return jsonify({'id':id, 'metric':'Jaccard', 'value':round(simValue,3)})
 
 @app.route('/similarity', methods=['GET', 'POST'])
 def similarity():
     start = timer()
-    algorithm = request.args.get('alg', None)
-    if algorithm is None:
-        abort(404)
-    else:
-        if algorithm == '': abort(404)
-        if algorithm == 'jaccard': resp = jaccard()
-        if algorithm == 'cosine': resp = cosine()
-        if algorithm == 'euclidean': resp = euclidean()
-        if algorithm == 'naive': resp = naive()
+    resp = None
+    algorithm = request.args.get('alg', 'cosine')
+
+    if algorithm == '': abort(404)
+    if algorithm == 'jaccard': resp = jaccard()
+    if algorithm == 'cosine': resp = cosine()
+    if algorithm == 'euclidean': resp = euclidean()
+    if algorithm == 'naive': resp = naive()
+
+    if resp is None:
+        raise errorHandler('Invalid alg parameter', statusCode=404)
 
     return resp
 
