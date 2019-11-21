@@ -6,7 +6,6 @@ from flask_cors import CORS
 from timeit import default_timer as timer
 import pandas as pd
 sys.path.append(os.getcwd())
-import logic.Evaluator
 from logic import Evaluator
 
 app = flask.Flask(__name__)
