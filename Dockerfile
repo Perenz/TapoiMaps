@@ -1,6 +1,6 @@
 FROM python:3
-ADD web/app.py /
+ADD src/app.py /
 
-RUN pip install requirements.txt
+RUN pip install -r requirements.txt
 
-CMD ["python", "./web/app.py"]\
+CMD ["python", "./src/app.py"]
