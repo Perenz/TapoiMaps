@@ -108,4 +108,5 @@ def similarity():
 
     return resp
 
-app.run()
+if __name__ == '__main__':
+    app.run(port=5000)
