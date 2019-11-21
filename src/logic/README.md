@@ -70,6 +70,25 @@ In conclusion, I did not follow all the constraints, which define a truly RESTfu
 
 
 
+### Storage
+
+I did not use any type of database to store the profiles and I saved them locally on the Web Server with a Json format. So with an higher number of observation for each profile and an increasing amount of users the process would become slower. Since the reduced complexity of the system my idea was that of storing the files locally without using an external storage support. Because of that I started looking for something faster and scalable.
+
+I looked for some pandas compatible format alternatives to Json that would speed up the operations. This would have allowed me to speed up the initialization of the web server which compute the uploading of all the user profiles in different dataframes and would allow me to switch the storage system architecture in a way which performs the reading of the profiles only when it is required. This would decrease the amount of memory used by the application because profiles are not permanently loaded as dataframes but on the other hand the number of reading operation from the files representing the users rises because we have to load all the dataframes at every requests to evaluate the similarity
+
+Because of this I looked for an alternative format that would help my application to scale being faster and lighter. According to [this article](https://towardsdatascience.com/the-best-format-to-save-pandas-data-414dca023e0d) I find interesting facts.
+
+Some format were valuated under 5 metrics which include file size, save time (save dataframe onto a disk) and load time (load dataframe into memory) . What matters for our application is the load_time since it's the time required from the operation of reading the stored file uploading it as dataframe.
+The mentioned study shows some well-known information, like the slowness of a CSV file, but also somo others that could help us take a decision; indeed we can notice at the impressive results in term of load time for parquet and feather.
+We can notice how feather and parquet have great values for the memory consumption during the operation of saving and loading. Parquet also shows impressive results in term of file size.
+
+Changing approach and treating the data as Pandas Categorical does return different insights. Binary formats reach fantastic scores with parquet being the slower in term of save operations but in the average for load time. Talking about file size parquet and feather obtain more or less the same results but parquet shows noticeable overhead in memory consumption during the opration of loading since it requires an extra amount of resources to un-compress the data back into a dataframe.
+
+To sum up, even though feather shows better general results I think that for our system the best choice is the parquet format. Indeed feather is not expected to be used as a long-term file storage while parquet does. 
+In addition, parquet is support by many different systems that perform analytics which would help our application scaling.
+
+
+
 
 
 

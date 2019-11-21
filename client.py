@@ -1,6 +1,7 @@
 import requests
-import logic.Evaluator
+import src.logic.Evaluator
 import json
+
 
 
 jsonFile = open('./computedFiles/michelle.json')

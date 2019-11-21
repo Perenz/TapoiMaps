@@ -5,7 +5,6 @@ itsdangerous
 Jinja2
 joblib
 MarkupSafe
-numpy
 pandas
 python-dateutil
 pytz
