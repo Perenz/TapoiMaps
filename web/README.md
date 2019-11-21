@@ -32,48 +32,7 @@ I used profiles structured like this one to evaluate the similarity.
 
 
 
-
-
-## System architecture
-
-I developed a Web Service over HTTP using the architecture style knew as REST.
-
-So I implemented the system thinking at some of the  architectural constraint which have to be respected to create a RESTful API.
-
-
-
-
-+ ### Uniform Interface
-
-I followed a familiar approach similar to other APIs
-The resources inside the system are accessible through a logical URI which name is releated to the content of the resource.
-The resource representations as well as the requests follow the  well defined format represented by Json and certain guidlines such as naming convention.
-HTTP GET requests allow the user to acces the resources but not to modify them.
-
-
-
-+ ### Client - Server and stateless
-
-There isn't any type of relationship between the client and the server. The server is able to evolve separately from the client which knows only the URIs of the resource and not their organization. 
-Obviously the communications betweeen the 2 are all stateless. The server does not store anything about the requests the client had sent, each request is treat as a new one.
-The system does not use an authentication system
-
-
-
-+ ### Layering
-
-I did not layered my system, so I created a single web server which serve the HTTP requests and also store all the data required from the algorithms to process and return a valid response to the client. This would absolutely be one of the focus point to improve the scalability of the system. The use of different servers for the execution of differenced tasks would help to keep good performances with a high number of profiles and users.
-
-
-
-In conclusion, I did not follow all the constraints, which define a truly RESTful API, I  violated some of them which were not necessary because of the reduced dimensions and complexities of the system.
-
-
-
-
-
-
-## Documentation
+## Similarity Evaluation
 
 ### Get ID of the most similar profile
 

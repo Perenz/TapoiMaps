@@ -5,7 +5,7 @@ import sys
 from flask_cors import CORS
 from timeit import default_timer as timer
 import pandas as pd
-sys.path.append('C:/Users/stefa/Desktop/U-Hopper/TapoiMaps')
+sys.path.append(os.getcwd())
 import logic.Evaluator
 from logic import Evaluator
 
@@ -32,13 +32,16 @@ class errorHandler(Exception):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
-    return errorHandler("Wrong url path", 400)
+    raise errorHandler("Wrong url path", statusCode=400)
 
 @app.errorhandler(errorHandler)
 def handleError(error):
+    '''
     respose = jsonify(error.to_dict())
     respose.status_code = error.status_code
     return respose
+    '''
+    return {'message': str(error)}, getattr(error, 'code', 404)
 
 @app.route('/err')
 def getErr():
@@ -80,6 +83,8 @@ def jaccard():
     start = timer()
 
     json = request.get_json(silent=True)
+    if json is None:
+        raise errorHandler("No JSON gave", statusCode=404)
     
     id, simValue = evalu.computeJaccardDist(pd.DataFrame(json, index=['test'])) 
     end = timer()
