@@ -4,7 +4,7 @@
 
 TapoiMaps is a simple API developed as exercise for an interview at U-Hopper.
 It allows consumers to evaluate the similarity of a user profile against a set of existing ones.
-Each profile is represented through the topics discussed (According to Wikipedia's titles) togheter with the number of times each topich as been mentioned.
+Each profile is represented through the topics discussed (According to Wikipedia's titles) together with the number of times each topic as been mentioned.
 
 ```json
 {
@@ -73,6 +73,7 @@ In conclusion, I did not follow all the constraints, which define a truly RESTfu
 ### Storage
 
 I did not use any type of database to store the profiles and I saved them locally on the Web Server with a Json format. So with an higher number of observation for each profile and an increasing amount of users the process would become slower. Since the reduced complexity of the system my idea was that of storing the files locally without using an external storage support. Because of that I started looking for something faster and scalable.
+This decision also implies the necessity of restarting the web service after the addition/delete of a file json representing an user profile if these operation are done manually and not using the available API.
 
 I looked for some pandas compatible format alternatives to Json that would speed up the operations. This would have allowed me to speed up the initialization of the web server which compute the uploading of all the user profiles in different dataframes and would allow me to switch the storage system architecture in a way which performs the reading of the profiles only when it is required. This would decrease the amount of memory used by the application because profiles are not permanently loaded as dataframes but on the other hand the number of reading operation from the files representing the users rises because we have to load all the dataframes at every requests to evaluate the similarity
 
@@ -84,8 +85,46 @@ We can notice how feather and parquet have great values for the memory consumpti
 
 Changing approach and treating the data as Pandas Categorical does return different insights. Binary formats reach fantastic scores with parquet being the slower in term of save operations but in the average for load time. Talking about file size parquet and feather obtain more or less the same results but parquet shows noticeable overhead in memory consumption during the opration of loading since it requires an extra amount of resources to un-compress the data back into a dataframe.
 
-To sum up, even though feather shows better general results I think that for our system the best choice is the parquet format. Indeed feather is not expected to be used as a long-term file storage while parquet does. 
-In addition, parquet is support by many different systems that perform analytics which would help our application scaling.
+To sum up, even though feather shows better general results I think that for our system the best choice is the parquet format. Indeed feather is not expected to be used as a long-term file storage while parquet is. 
+In addition, parquet is supported by many different systems that perform analytics such as Spark and AWS Services which would help our application scaling
+
+
+## Scalability
+
+I already mentioned a bunch of choices or possible improvements that could help against the huge scalability challenge; for instance the use of third parties libraries like scikit, the introduction of a lighter format or the layering of the system architecture would all promote the application scalability. Anyway, now I'm going to talk about actual solutions that allow out web service to keep good performances with an higher number of user, requests and, therefore, traffic.
+
+
+
+### Load sharing through redirection
+
+A distributed architecture (as mentioned before) consisting of independent servers sharing the load is a fundamental key for implementing a web server. Most suggest using some form of Weighted Round-Robin implemented using the DNS server, this approach requires each server to handle requests for all the data stored; a problem that can be solved in two different ways: a first one which requires that each server must store its own copy of all the data or a second alternative  implying to access the data from other HTTP servers (doing requests) or some database servers (doing requests), both generate significant back-end traffic which requires additional resources to be processed not allowing the application to scale properly.
+Thus, a  "redirection-based" hierarcical architecture is often preferred since it eliminates bottlenecks in the server and allows the introduction of new hardware to handle increases in load. Here, two levels of server are used, each storing partioned data according to their content. There are redirection servers used to distribuite the users requests to the corresponding normal HTTP servers which respond to client's requests.
+This kind of approach results completely trasparent to the user and achieves better caching efficiency compared with other load balancing schemes guaranteering a great scaling.  
+
+
+
+### Horizontal scalability
+
+Thinking about our specific application should be said that we are facing a structure that fits well for horizontal scalability. The addition of more machines would give us the opportunity to distribute the data over multiple servers. Thus each of these servers would perform the similarity coefficient evaluation over a restricted set of the target profiles. Then the results obtained from each machine can be merged together to extract global insights.
+So every server becomes faster and the performance raise.
+In addition, while horizontal scaling is less suitable for Relational DB as it relies on Costintency and Atomicity, NoSQL databases take advantages of horizontal scalability since they follow the de-normalization concept so duplicates can be stored. Our application doesn't involve strict atomic transactions and an elevate number of joints so horizontal scaling used together with NoSQL DB would boost the productivity
+
+
+
+
+
+### Storage support
+
+As mentioned before the efficiency may raise using a database to store our files representing the profiles. Although we can observe a kind of relational structure in our data, since Wiki categories could be seen as a big table containing thousands of rows which are related to user profiles, I don't think this solution would guarantee the best performances.
+I would rather use systems designed for document store which compose one of the main categories of NoSQL databases. These types of database fits perfect with our necessity of storing semi structured data encoded in standard format such as Json.
+I will focus on two of the most famous DBMS from the mentioned class: MongoDB and CouchDB. The two differs in several aspects, starting from the DB structure. CouchDB stores JSON format offering CRUD operations above them, MongoDB use a less strict structure allowing schema-free data storing in a binary format, so documents are not required to have a predefined structure so different documents in the collection can have different columns; a feature that fits perfectly for our system. While CouchDB achieves scalability through master-slave replication (The master perform the writes and then passes the updated information to the slaves which can perform read anytime) MongoDB does it horizontally supporting automatic sharding, distributing documents over servers and uses replication just for failover.
+MongoDB provides faster read speeds and it is the better choice for a rapidly growing database that could be our case because of the profiles' size so i would recommend it more than CouchDB.
+
+A third alternative would be that of adopting a graph database storing each profile and each category as a single node; references from an user for a specific topic could be represented using weighted edges. Scalability is usually great for these types of graphs and they are much more adequate to handle changing data with evolutionary pattern. On the contrary Relational and NoSQL DBMS are typically faster in performing the same operations on a large number of data.
+
+
+
+
 
 
 
@@ -96,7 +135,7 @@ In addition, parquet is support by many different systems that perform analytics
 
 ### Get ID of the most similar profile
 
-It takes a JSON object representing a user profile and perform the evaluation of the similarity coefficient  for  every profile stored precedently.
+It takes a JSON object representing a user profile and perform the evaluation of the similarity coefficient  for  every profile stored previously.
 The ID of the most similar is returned with the value of the similarity associated
 
 

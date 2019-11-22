@@ -25,7 +25,7 @@ def getTargetsDF():
 
             dfT = pd.DataFrame(data, index=[name])
 
-            targets.append(dfT)
+            targets.append({'id':name, 'data':dfT})
 
     return targets
 
@@ -72,12 +72,18 @@ class similarityEvaluator():
         '''
         cosMat = []
         for i in range(len(self.targets)):
-            cosMat.append(cosine_similarity(dfTest.append(self.targets[i], sort=False).fillna(0))[0,1])
+            cosMat.append(cosine_similarity(dfTest.append(self.targets[i]['data'], sort=False).fillna(0))[0,1])
 
         #print(cosMat)
 
         ind = argmax(cosMat)
-        return self.targets[ind].iloc[0].name, cosMat[ind]
+        maxN = round(cosMat[ind], 6)
+
+        maxNames = [self.targets[i]['id'] for i,j in enumerate(cosMat) if round(j, 6)==maxN]
+
+        print(maxNames)
+
+        return maxNames, maxN
 
     def computeEuclideanDist(self, dfTest):
         '''
@@ -88,12 +94,15 @@ class similarityEvaluator():
         '''
         eucMat = []
         for i in range(len(self.targets)):
-            eucMat.append(euclidean_distances(normalize(dfTest.append(self.targets[i], sort=False).fillna(0)))[0,1])
+            eucMat.append(euclidean_distances(normalize(dfTest.append(self.targets[i]['data'], sort=False).fillna(0)))[0,1])
 
         #print(eucMat)
 
         ind = argmin(eucMat)
-        return self.targets[ind].iloc[0].name, eucMat[ind]
+        minN = round(eucMat[ind], 6)
+        maxNames = [self.targets[i]['id'] for i,j in enumerate(eucMat) if round(j, 6)==minN]
+
+        return maxNames, minN
 
 
     def computeNaiveDist(self, dfTest):
@@ -105,12 +114,14 @@ class similarityEvaluator():
         '''
         naiveMat = []
         for i in range(len(self.targets)):
-            naiveMat.append(pairwise_distances(dfTest.append(self.targets[i], sort=False).fillna(0), metric=naiveMetric)[0,1])
+            naiveMat.append(pairwise_distances(dfTest.append(self.targets[i]['data'], sort=False).fillna(0), metric=naiveMetric)[0,1])
 
         #print(naiveMat)
 
         ind = argmax(naiveMat)
-        return self.targets[ind].iloc[0].name, naiveMat[ind]
+        maxN = round(naiveMat[ind], 6)
+        maxNames = [self.targets[i]['id'] for i,j in enumerate(naiveMat) if round(j, 6)==maxN]
+        return maxNames, maxN
 
     def computeJaccardDist(self, dfTest):
         '''
@@ -121,10 +132,12 @@ class similarityEvaluator():
         '''
         jacMat = []
         for i in range(len(self.targets)):
-            jacMat.append(pairwise_distances(dfTest.append(self.targets[i], sort=False).fillna(0), metric=weightedJaccard)[0,1])
-
-        #print(jacMat)
-
+            jacMat.append(pairwise_distances(dfTest.append(self.targets[i]['data'], sort=False).fillna(0), metric=weightedJaccard)[0,1])
+        
         ind = argmin(jacMat)
-        return self.targets[ind].iloc[0].name, jacMat[ind]
+        minN = round(jacMat[ind], 6)
+        maxNames = [self.targets[i]['id'] for i,j in enumerate(jacMat) if round(j, 6)==minN]
+      
+
+        return maxNames, minN
 
