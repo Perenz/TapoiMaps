@@ -21,11 +21,11 @@ def getTargetsDF():
             jsonStr = jsonFile.read()
             data = json.loads(jsonStr)
             
-            name = file.split('.')[0]
+            id = file.split('.')[0]
 
-            dfT = pd.DataFrame(data, index=[name])
+            dfT = pd.DataFrame(data, index=[id])
 
-            targets.append({'id':name, 'data':dfT})
+            targets.append({'id':id, 'data':dfT})
 
     return targets
 
@@ -73,17 +73,13 @@ class similarityEvaluator():
         cosMat = []
         for i in range(len(self.targets)):
             cosMat.append(cosine_similarity(dfTest.append(self.targets[i]['data'], sort=False).fillna(0))[0,1])
-
-        #print(cosMat)
-
+            
         ind = argmax(cosMat)
         maxN = round(cosMat[ind], 6)
 
-        maxNames = [self.targets[i]['id'] for i,j in enumerate(cosMat) if round(j, 6)==maxN]
+        maxIDs = [self.targets[i]['id'] for i,j in enumerate(cosMat) if round(j, 6)==maxN]
 
-        print(maxNames)
-
-        return maxNames, maxN
+        return maxIDs, maxN
 
     def computeEuclideanDist(self, dfTest):
         '''
@@ -100,9 +96,9 @@ class similarityEvaluator():
 
         ind = argmin(eucMat)
         minN = round(eucMat[ind], 6)
-        maxNames = [self.targets[i]['id'] for i,j in enumerate(eucMat) if round(j, 6)==minN]
+        maxIDs = [self.targets[i]['id'] for i,j in enumerate(eucMat) if round(j, 6)==minN]
 
-        return maxNames, minN
+        return maxIDs, minN
 
 
     def computeNaiveDist(self, dfTest):
@@ -136,8 +132,8 @@ class similarityEvaluator():
         
         ind = argmin(jacMat)
         minN = round(jacMat[ind], 6)
-        maxNames = [self.targets[i]['id'] for i,j in enumerate(jacMat) if round(j, 6)==minN]
+        maxIDs = [self.targets[i]['id'] for i,j in enumerate(jacMat) if round(j, 6)==minN]
       
 
-        return maxNames, minN
+        return maxIDs, minN
 

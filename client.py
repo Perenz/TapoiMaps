@@ -1,5 +1,4 @@
 import requests
-import src.logic.Evaluator
 import json
 
 
@@ -12,7 +11,11 @@ targetJson = json.loads(jsonStr)
 
 # https://tapoimaps.herokuapp.com:5000
 # http://127.0.0.1:5000/similarity?alg=jaccard
-r = requests.post('http://127.0.0.1:5000/similarity?alg=cosine', json=targetJson)
+#r = requests.get('http://127.0.0.1:5000/similarity?alg=cosine', json=targetJson)
+
+#r = requests.get('http://127.0.0.1:5000/profiles')
+
+r = requests.get('http://127.0.0.1:5000/profiles/tim')
 
 #r = requests.post('http://127.0.0.1:5000/profiles?name=prova1', json=targetJson)
 

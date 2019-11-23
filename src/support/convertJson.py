@@ -1,7 +1,7 @@
 import json
 import re
 
-jsonFileName = 'tim.json'
+jsonFileName = 'roger.json'
 
 jsonFile = open('./jsonFiles/'+jsonFileName)
 jsonStr = jsonFile.read()

@@ -30,20 +30,16 @@ After a bit of pre-elaboration I extracted a more compact representation of the 
 
 I used profiles structured like this one to evaluate the similarity.
 
-
-
-## Similarity Evaluation
+## Documentation
 
 ### Get ID of the most similar profile
 
-It takes a JSON object representing a user profile and perform the evaluation of the similarity coefficient  for  every profile stored precedently.
+It takes a JSON object representing a user profile and perform the evaluation of the similarity coefficient  for  every profile stored previously.
 The ID of the most similar is returned with the value of the similarity associated
 
 
 
-<hr>
-
-**URL: ** http://**localhost/5000**/similarity
+**URL: ** /similarity
 
 **METHOD: ** GET
 
@@ -66,6 +62,7 @@ A json representing an user profile
 
 
 + **alg**
+
 > Tells the server which algorithm run to evaluate the similarity between the profiles
 >
 > default = cosine
@@ -99,4 +96,141 @@ A json representing an user profile
 ```
 
 <hr>
+
+### Get all profiles
+
+Return a list of all the profile's IDs memorized inside the application
+
+
+
+**URL: ** /profiles
+
+**METHOD: ** GET
+
+**RESPONSE 200: **(application/json)
+
+```json
+[
+  {
+    "id": "emma"
+  }, 
+  {
+    "id": "michelle"
+  }, 
+  {
+    "id": "roger"
+  }, 
+  {
+    "id": "tim"
+  }
+]
+```
+
+<hr>
+
+
+### Get profile whole description
+
+Given a profile ID returns the whole profile overview in json format.
+
+
+
+**URL: ** /profiles/<id>
+
+
+<id> must be an existing profile's ID
+
+**METHOD: ** GET
+
+**RESPONSE 200: **(application/json)
+
+```json
+{
+	"id":'Stefano',
+	"data":	{
+        "Love": 1,
+        "Feudalism": 3,
+        "Human_behaviour": 2,
+        "2011_singles": 21,
+        "Primary_historical_works": 1
+    }
+}
+```
+
+<hr>
+
+### Add a new profile
+
+It takes a JSON object representing a user profile,  an argument for the profile ID and stores the new named profile in the application
+
+**URL: ** /profiles
+
+
+**METHOD: ** POST
+
+**BODY: **
+
+A json representing an user profile
+
+```json
+{
+    "Love": 1,
+    "Feudalism": 3,
+    "Human_behaviour": 2,
+    "2011_singles": 21,
+    "Primary_historical_works": 1,
+}
+```
+
+**PARAMETERS: **
+
++ **id**
+
+>Tells the application the ID of the new uploaded profile
+>It must be new and not already in use
+
+**RESPONSE 200: **(application/json)
+
+```json
+{
+	"message":"Profile add correctly",
+	"id":'roger'
+}
+```
+
+<hr>
+
+### Remove an existing profile
+
+It takes an argument for the profile ID and deletes that profile from the application storage
+
+**URL: ** /profiles
+
+
+**METHOD: ** DELETE
+
+
+**PARAMETERS: **
+
++ **id**
+
+>Tells the application the ID of the new uploaded profile
+>It must exist
+
+**RESPONSE 200: **(application/json)
+
+```json
+{
+	"message":"Profile removed correctly",
+	"id":'roger'
+}
+```
+
+<hr>
+
+
+
+
+
+
 

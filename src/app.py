@@ -73,9 +73,9 @@ def similarity():
 @app.route('/profiles', methods=['DELETE'])
 def deleteProfile():
     #Get request parameter representing the name/id of the loaded profile
-    name = request.args.get('name', None)
+    id = request.args.get('id', None)
     #Compose the filename + path
-    filename = './computedFiles/'+name+'.json'
+    filename = './computedFiles/'+id+'.json'
 
     if os.path.exists(filename):
         os.remove(filename)
@@ -83,10 +83,40 @@ def deleteProfile():
         raise errorHandler("The specified profile does not exist", statusCode=500)
 
     #Apply a filter to evalu.targets to remove the deleted profile
-    evalu.targets = list(filter(lambda p: p['id']!=name, evalu.targets))
+    evalu.targets = list(filter(lambda p: p['id']!=id, evalu.targets))
 
-    return jsonify({'message':'Profile removed correctly','id':name})
+    return jsonify({'message':'Profile removed correctly','id':id})
 
+@app.route('/profiles/<id>', methods=['GET'])
+def getProfile(id):
+
+    #Compose the filename + path
+    filename = './computedFiles/'+id+'.json'
+
+    #Raise error if specified id does not exists
+    if not os.path.exists(filename):
+        raise errorHandler("The specified profile does not exist", statusCode=500)
+        
+    #Else, load the json data of the file
+    jsonFile = open(filename)
+    jsonStr = jsonFile.read()
+    data = json.loads(jsonStr)
+
+    #Return the json
+    return jsonify({'id':id, 'data':data})
+
+@app.route('/profiles', methods=['GET'])
+def allProfiles():
+    #Creating empty profile list
+    profiles = []
+    #For each file representing a profile
+    for file in os.listdir('./computedFiles'):
+        if file.endswith('.json'):
+            #Add it to the list
+            profiles.append({'id':file.split('.')[0]})
+
+    #Return the list of profiles
+    return jsonify(profiles)
 
 @app.route('/profiles', methods=['POST'])
 def addProfile():
@@ -96,9 +126,9 @@ def addProfile():
         raise errorHandler("No JSON gave", statusCode=404)
 
     #Get request parameter representing the name/id of the loaded profile
-    name = request.args.get('name', None)
+    id = request.args.get('id', None)
     #Compose the filename + path
-    filename = './computedFiles/'+name+'.json'
+    filename = './computedFiles/'+id+'.json'
 
     #Check if filename already exists
     if(os.path.exists(filename)):
@@ -109,11 +139,11 @@ def addProfile():
 
 
     #Add the new json profile to the evaluator
-    dfT = pd.DataFrame(jsonProf, index=[name])
+    dfT = pd.DataFrame(jsonProf, index=[id])
 
-    evalu.targets.append({'id':name, 'data':dfT})
+    evalu.targets.append({'id':id, 'data':dfT})
 
-    return jsonify({'message':'Profile added correctly','id':name})
+    return jsonify({'message':'Profile added correctly','id':id})
 
 
 
