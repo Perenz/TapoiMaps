@@ -16,7 +16,7 @@ Each profile is represented through the topics discussed (According to Wikipedia
 }
 ```
 
-After a bit of pre-elaboration I extracted a more compact representation of the user profile removing Wikipedia URI and keeping only the category
+After a bit of pre-elaboration I extracted a more compact representation of the user profile removing Wikipedia URI and keeping only the category name.
 
 ```json
 {
@@ -45,24 +45,27 @@ So I implemented the system thinking at some of the  architectural constraint wh
 
 + ### Uniform Interface
 
-I followed a familiar approach similar to other APIs
-The resources inside the system are accessible through a logical URI which name is releated to the content of the resource.
-The resource representations as well as the requests follow the  well defined format represented by Json and certain guidlines such as naming convention.
-HTTP GET requests allow the user to acces the resources but not to modify them.
+I followed a familiar approach similar to other APIs.
+The resources inside the system are accessible through a logical URI which name is related to the content of the resource.
+The resource representations as well as the requests follow the  well defined format represented by Json and certain guidelines such as naming convention.
+HTTP GET requests allow the user to access the resources but not to modify them. 
+Resource adding operations can be performed through POST Requests and can be removed using DELETED Requests. 
 
 
 
 + ### Client - Server and stateless
 
 There isn't any type of relationship between the client and the server. The server is able to evolve separately from the client which knows only the URIs of the resource and not their organization. 
-Obviously the communications betweeen the 2 are all stateless. The server does not store anything about the requests the client had sent, each request is treat as a new one.
-The system does not use an authentication system
+Obviously the communications between the 2 are completely stateless. The server does not store anything about the requests the client had sent, each request is treat as a new one.
+The application does not use an authentication system.
 
 
 
 + ### Layering
 
-I did not layered my system, so I created a single web server which serve the HTTP requests and also store all the data required from the algorithms to process and return a valid response to the client. This would absolutely be one of the focus point to improve the scalability of the system. The use of different servers for the execution of differenced tasks would help to keep good performances with a high number of profiles and users.
+I did not layered my system, so I created a single web server which serve all the HTTP requests and also store all the data required from the algorithms to process and return a valid response to the client. This would absolutely be one of the focus point to improve the scalability of the system. The use of different servers, each used to perform specific field-related operation, for the execution of differenced tasks would help to keep good performances with a high number of profiles and users.
+
+
 
 
 
@@ -75,18 +78,21 @@ In conclusion, I did not follow all the constraints, which define a truly RESTfu
 I did not use any type of database to store the profiles and I saved them locally on the Web Server with a Json format. So with an higher number of observation for each profile and an increasing amount of users the process would become slower. Since the reduced complexity of the system my idea was that of storing the files locally without using an external storage support. Because of that I started looking for something faster and scalable.
 This decision also implies the necessity of restarting the web service after the addition/delete of a file json representing an user profile if these operation are done manually and not using the available API.
 
-I looked for some pandas compatible format alternatives to Json that would speed up the operations. This would have allowed me to speed up the initialization of the web server which compute the uploading of all the user profiles in different dataframes and would allow me to switch the storage system architecture in a way which performs the reading of the profiles only when it is required. This would decrease the amount of memory used by the application because profiles are not permanently loaded as dataframes but on the other hand the number of reading operation from the files representing the users rises because we have to load all the dataframes at every requests to evaluate the similarity
+I looked for some pandas compatible format alternatives to Json that would speed up the operations. This would have allowed me to speed up the initialization of the web server which compute the uploading of all the user profiles in different dataframes and would allow me to switch the storage system architecture in a way which performs the reading of the profiles only when it is required. This will decrease the amount of memory used by the application because profiles are not permanently loaded as dataframes but on the other hand the number of reading operation from the files representing the users rises because we have to load all the dataframes at every requests to evaluate the similarity.
 
-Because of this I looked for an alternative format that would help my application to scale being faster and lighter. According to [this article](https://towardsdatascience.com/the-best-format-to-save-pandas-data-414dca023e0d) I find interesting facts.
+Because of this I looked for an alternative format that would help my application to scale, being faster and lighter. 
 
-Some format were valuated under 5 metrics which include file size, save time (save dataframe onto a disk) and load time (load dataframe into memory) . What matters for our application is the load_time since it's the time required from the operation of reading the stored file uploading it as dataframe.
-The mentioned study shows some well-known information, like the slowness of a CSV file, but also somo others that could help us take a decision; indeed we can notice at the impressive results in term of load time for parquet and feather.
+According to [this article](https://towardsdatascience.com/the-best-format-to-save-pandas-data-414dca023e0d) I find many interesting facts.
+
+Some format had been valuated under 5 metrics which include file size, save time (save dataframe onto a disk) and load time (load dumped dataframe into memory) . What matters more for our application is the load_time since it's the time required from the operation of reading the stored file uploading it as dataframe while saving operations (PUT /profiles) are quite rare.
+The mentioned study shows some well-known information, like the slowness of a CSV file, but also some others that could help us take a decision such as, for example, the impressive results in term of load time for parquet and feather.
 We can notice how feather and parquet have great values for the memory consumption during the operation of saving and loading. Parquet also shows impressive results in term of file size.
 
-Changing approach and treating the data as Pandas Categorical does return different insights. Binary formats reach fantastic scores with parquet being the slower in term of save operations but in the average for load time. Talking about file size parquet and feather obtain more or less the same results but parquet shows noticeable overhead in memory consumption during the opration of loading since it requires an extra amount of resources to un-compress the data back into a dataframe.
+Changing approach and treating the data as Pandas Categorical does return different insights. Binary formats reach fantastic scores with parquet being the slower in term of save operations but in the average for load time. Talking about file size parquet and feather obtain more or less the same results but parquet shows noticeable overhead in memory consumption during the operation of loading since it requires an extra amount of resources to un-compress the data back into a dataframe.
 
 To sum up, even though feather shows better general results I think that for our system the best choice is the parquet format. Indeed feather is not expected to be used as a long-term file storage while parquet is. 
-In addition, parquet is supported by many different systems that perform analytics such as Spark and AWS Services which would help our application scaling
+In addition, parquet is supported by many different systems that perform analytics such as Spark and AWS Services which would help our application scaling.
+
 
 
 ## Scalability
@@ -98,8 +104,8 @@ I already mentioned a bunch of choices or possible improvements that could help 
 ### Load sharing through redirection
 
 A distributed architecture (as mentioned before) consisting of independent servers sharing the load is a fundamental key for implementing a web server. Most suggest using some form of Weighted Round-Robin implemented using the DNS server, this approach requires each server to handle requests for all the data stored; a problem that can be solved in two different ways: a first one which requires that each server must store its own copy of all the data or a second alternative  implying to access the data from other HTTP servers (doing requests) or some database servers (doing requests), both generate significant back-end traffic which requires additional resources to be processed not allowing the application to scale properly.
-Thus, a  "redirection-based" hierarcical architecture is often preferred since it eliminates bottlenecks in the server and allows the introduction of new hardware to handle increases in load. Here, two levels of server are used, each storing partioned data according to their content. There are redirection servers used to distribuite the users requests to the corresponding normal HTTP servers which respond to client's requests.
-This kind of approach results completely trasparent to the user and achieves better caching efficiency compared with other load balancing schemes guaranteering a great scaling.  
+Thus, a  "redirection-based" hierarchical architecture is often preferred since it eliminates bottlenecks in the server and allows the introduction of new hardware to handle increases in load. Here, two levels of server are used, each storing partitioned data according to their content. There are redirection servers used to distribute the users requests to the corresponding normal HTTP servers which respond to client's requests.
+This kind of approach results completely transparent to the user and achieves better caching efficiency compared with other load balancing schemes guaranteeing a great scaling.  
 
 
 
@@ -107,7 +113,7 @@ This kind of approach results completely trasparent to the user and achieves bet
 
 Thinking about our specific application should be said that we are facing a structure that fits well for horizontal scalability. The addition of more machines would give us the opportunity to distribute the data over multiple servers. Thus each of these servers would perform the similarity coefficient evaluation over a restricted set of the target profiles. Then the results obtained from each machine can be merged together to extract global insights.
 So every server becomes faster and the performance raise.
-In addition, while horizontal scaling is less suitable for Relational DB as it relies on Costintency and Atomicity, NoSQL databases take advantages of horizontal scalability since they follow the de-normalization concept so duplicates can be stored. Our application doesn't involve strict atomic transactions and an elevate number of joints so horizontal scaling used together with NoSQL DB would boost the productivity
+In addition, while horizontal scaling is less suitable for Relational DB as it relies on consistency and atomicity, NoSQL databases take advantages of horizontal scalability since they follow the de-normalization concept so duplicates can be stored. Our application doesn't involve neither strict atomic transactions or elevate number of joints so horizontal scaling used together with NoSQL DB would boost the productivity
 
 
 

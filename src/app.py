@@ -5,7 +5,6 @@ from flask import jsonify, Flask, request, make_response, abort
 import sys
 from flask_cors import CORS
 import pandas as pd
-#sys.path.append(os.getcwd())
 from logic import Evaluator
 
 app = flask.Flask(__name__)
