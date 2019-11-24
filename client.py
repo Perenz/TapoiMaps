@@ -11,15 +11,15 @@ targetJson = json.loads(jsonStr)
 
 # https://tapoimaps.herokuapp.com:5000
 # http://127.0.0.1:5000/similarity?alg=jaccard
-#r = requests.get('http://127.0.0.1:5000/similarity?alg=cosine', json=targetJson)
+r = requests.get('http://127.0.0.1:5000/similarity?alg=euclidean', json=targetJson)
 
 #r = requests.get('http://127.0.0.1:5000/profiles')
 
-r = requests.get('http://127.0.0.1:5000/profiles/tim')
+#r = requests.get('http://127.0.0.1:5000/profiles/tim')
 
-#r = requests.post('http://127.0.0.1:5000/profiles?name=prova1', json=targetJson)
+#r = requests.post('http://127.0.0.1:5000/profiles?id=prova', json=targetJson)
 
-#r = requests.delete('http://127.0.0.1:5000/profiles?name=prova1')
+#r = requests.delete('http://127.0.0.1:5000/profiles?id=prova1')
 
 
 resp = r.json()

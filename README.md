@@ -7,10 +7,7 @@
 + 4. Describe the matching algorithm used in order to identify, among the 4 available ones, the one most similar to the profile provided via API. 
 + 5. Prepare a dockerized version of your solution. 
 
-
-
-
-
+<hr>
 
 Developed by [Stefano Perenzoni]('mailto:stefano.perenzoni@gmai.com']) while enrolled at [Univerisity of Trento]( https://www.unitn.it/ )
 

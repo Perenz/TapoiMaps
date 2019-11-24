@@ -23,6 +23,7 @@ def getTargetsDF():
             
             id = file.split('.')[0]
 
+            #Load the profile json in a dataframe
             dfT = pd.DataFrame(data, index=[id])
 
             targets.append({'id':id, 'data':dfT})
@@ -38,7 +39,6 @@ def naiveMetric(x, y):
     yTw = sum(y)
 
     # **2 gives more importance to the fact that both cited the same topic instead of how much they had talked about it
-    # Problem: Longer profiles higher the similarity; it doesn't give value to different topic
     dist = sum(min(x[i]/xTw, y[i]/yTw) for i in range(len(x)))
     return dist
 
@@ -52,6 +52,7 @@ def weightedJaccard(x,y):
         num += min(x[i],y[i])
         den += max(x[i],y[i])
 
+    #Avoid division by zero
     return 1 - num/max(1,den)
 
 
@@ -60,7 +61,7 @@ class similarityEvaluator():
     Class used to run different algorithms for the evaluation of a similarity value
     '''
     def __init__(self):
-        #Load all the files in a dataframe/numpy
+        #Load all the files in a dataframe
         self.targets = getTargetsDF()
 
     def computeCosineSimilarity(self, dfTest):
@@ -71,8 +72,9 @@ class similarityEvaluator():
         Returns the id of the most similar one
         '''
         cosMat = []
-        for i in range(len(self.targets)):
-            cosMat.append(cosine_similarity(dfTest.append(self.targets[i]['data'], sort=False).fillna(0))[0,1])
+        #For each target
+        for t in self.targets:
+            cosMat.append(cosine_similarity(dfTest.append(t['data'], sort=False).fillna(0))[0,1])
             
         ind = argmax(cosMat)
         maxN = round(cosMat[ind], 6)
@@ -89,8 +91,8 @@ class similarityEvaluator():
         Returns the id of the most similar one
         '''
         eucMat = []
-        for i in range(len(self.targets)):
-            eucMat.append(euclidean_distances(normalize(dfTest.append(self.targets[i]['data'], sort=False).fillna(0)))[0,1])
+        for t in self.targets:
+            eucMat.append(euclidean_distances(normalize(dfTest.append(t['data'], sort=False).fillna(0)))[0,1])
 
         #print(eucMat)
 
@@ -109,8 +111,8 @@ class similarityEvaluator():
         Returns the id of the most similar one
         '''
         naiveMat = []
-        for i in range(len(self.targets)):
-            naiveMat.append(pairwise_distances(dfTest.append(self.targets[i]['data'], sort=False).fillna(0), metric=naiveMetric)[0,1])
+        for t in self.targets:
+            naiveMat.append(pairwise_distances(dfTest.append(t['data'], sort=False).fillna(0), metric=naiveMetric)[0,1])
 
         #print(naiveMat)
 
@@ -127,8 +129,8 @@ class similarityEvaluator():
         Returns the id of the most similar one
         '''
         jacMat = []
-        for i in range(len(self.targets)):
-            jacMat.append(pairwise_distances(dfTest.append(self.targets[i]['data'], sort=False).fillna(0), metric=weightedJaccard)[0,1])
+        for t in self.targets:
+            jacMat.append(pairwise_distances(dfTest.append(t['data'], sort=False).fillna(0), metric=weightedJaccard)[0,1])
         
         ind = argmin(jacMat)
         minN = round(jacMat[ind], 6)

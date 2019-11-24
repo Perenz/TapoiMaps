@@ -9,5 +9,6 @@ RUN pip install -r requirements.txt
 
 EXPOSE 5000
 EXPOSE 8080
+EXPOSE 80
 
 CMD ["python", "./src/app.py"]

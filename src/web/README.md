@@ -1,35 +1,3 @@
-# TapoiMaps
-
-## Introduction
-
-TapoiMaps is a simple API developed as exercise for an interview at U-Hopper.
-It allows consumers to evaluate the similarity of a user profile against a set of existing ones.
-Each profile is represented through the topics discussed (According to Wikipedia's titles) togheter with the number of times each topich as been mentioned.
-
-```json
-{
-    "http://en.wikipedia.org/wiki/Category:Love": 1,
-    "http://en.wikipedia.org/wiki/Category:Feudalism": 3,
-    "http://en.wikipedia.org/wiki/Category:Human_behaviour": 2,
-    "http://en.wikipedia.org/wiki/Category:2011_singles": 21,
-    "http://en.wikipedia.org/wiki/Category:Primary_historical_works": 1,
-}
-```
-
-After a bit of pre-elaboration I extracted a more compact representation of the user profile removing Wikipedia URI and keeping only the category
-
-```json
-{
-    "Love": 1,
-    "Feudalism": 3,
-    "Human_behaviour": 2,
-    "2011_singles": 21,
-    "Primary_historical_works": 1,
-}
-```
-
-I used profiles structured like this one to evaluate the similarity.
-
 ## Documentation
 
 ### Get ID of the most similar profile

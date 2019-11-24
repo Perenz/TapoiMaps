@@ -74,6 +74,8 @@ def similarity():
 def deleteProfile():
     #Get request parameter representing the name/id of the loaded profile
     id = request.args.get('id', None)
+    if id is None:
+        raise errorHandler("Must give an ID parameter", statusCode=500)
     #Compose the filename + path
     filename = './computedFiles/'+id+'.json'
 
@@ -127,6 +129,9 @@ def addProfile():
 
     #Get request parameter representing the name/id of the loaded profile
     id = request.args.get('id', None)
+    if id is None:
+        raise errorHandler("Must give an ID parameter", statusCode=500)
+       
     #Compose the filename + path
     filename = './computedFiles/'+id+'.json'
 
