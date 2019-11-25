@@ -17,16 +17,21 @@ def getTargetsDF():
         if file.endswith('.json'):
             #print(file.split('.')[0])
 
-            jsonFile = open('./computedFiles/'+file)
-            jsonStr = jsonFile.read()
-            data = json.loads(jsonStr)
+            try:
+                jsonFile = open('./computedFiles/'+file)
+                jsonStr = jsonFile.read()
+                data = json.loads(jsonStr)
+            except json.JSONDecodeError:
+                data = None
+                
             
             id = file.split('.')[0]
 
             #Load the profile json in a dataframe
-            dfT = pd.DataFrame(data, index=[id])
+            if not data is None:
+                dfT = pd.DataFrame(data, index=[id])
 
-            targets.append({'id':id, 'data':dfT})
+                targets.append({'id':id, 'data':dfT})
 
     return targets
 
@@ -76,8 +81,8 @@ class similarityEvaluator():
         for t in self.targets:
             cosMat.append(cosine_similarity(dfTest.append(t['data'], sort=False).fillna(0))[0,1])
             
-        ind = argmax(cosMat)
-        maxN = round(cosMat[ind], 6)
+        #Get index of the max
+        maxN = round(max(cosMat), 6)
 
         maxIDs = [self.targets[i]['id'] for i,j in enumerate(cosMat) if round(j, 6)==maxN]
 
@@ -96,8 +101,7 @@ class similarityEvaluator():
 
         #print(eucMat)
 
-        ind = argmin(eucMat)
-        minN = round(eucMat[ind], 6)
+        minN = round(min(eucMat), 6)
         maxIDs = [self.targets[i]['id'] for i,j in enumerate(eucMat) if round(j, 6)==minN]
 
         return maxIDs, minN
@@ -116,8 +120,7 @@ class similarityEvaluator():
 
         #print(naiveMat)
 
-        ind = argmax(naiveMat)
-        maxN = round(naiveMat[ind], 6)
+        maxN = round(max(naiveMat), 6)
         maxNames = [self.targets[i]['id'] for i,j in enumerate(naiveMat) if round(j, 6)==maxN]
         return maxNames, maxN
 
@@ -132,8 +135,7 @@ class similarityEvaluator():
         for t in self.targets:
             jacMat.append(pairwise_distances(dfTest.append(t['data'], sort=False).fillna(0), metric=weightedJaccard)[0,1])
         
-        ind = argmin(jacMat)
-        minN = round(jacMat[ind], 6)
+        minN = round(min(jacMat), 6)
         maxIDs = [self.targets[i]['id'] for i,j in enumerate(jacMat) if round(j, 6)==minN]
       
 

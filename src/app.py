@@ -45,7 +45,7 @@ def handleError(error):
 def getErr():
     raise errorHandler("This is an error page", statusCode=404)
 
-@app.route('/similarity', methods=['GET', 'POST'])
+@app.route('/similarity', methods=['GET'])
 def similarity():
     id = None
     #Get alg parameter from request url
@@ -54,10 +54,10 @@ def similarity():
     #Get profile from request body, if no json found, return error
     jsonReq = request.get_json(silent=True)
     if jsonReq is None:
-        raise errorHandler("No JSON gave", statusCode=404)
+        raise errorHandler("No JSON gave", statusCode=400)
 
     #Based on the alg parameter run a similarity evaluation algorithm
-    if algorithm == '': abort(404)
+    if algorithm == '': id, simValue = evalu.computeCosineSimilarity(pd.DataFrame(jsonReq, index=['test'])) 
     if algorithm == 'jaccard': id, simValue = evalu.computeJaccardDist(pd.DataFrame(jsonReq, index=['test'])) 
     if algorithm == 'cosine': id, simValue = evalu.computeCosineSimilarity(pd.DataFrame(jsonReq, index=['test'])) 
     if algorithm == 'euclidean': id, simValue = evalu.computeEuclideanDist(pd.DataFrame(jsonReq, index=['test'])) 
@@ -75,14 +75,14 @@ def deleteProfile():
     #Get request parameter representing the name/id of the loaded profile
     id = request.args.get('id', None)
     if id is None:
-        raise errorHandler("Must give an ID parameter", statusCode=500)
+        raise errorHandler("Must give an ID parameter", statusCode=400)
     #Compose the filename + path
     filename = './computedFiles/'+id+'.json'
 
     if os.path.exists(filename):
         os.remove(filename)
     else:
-        raise errorHandler("The specified profile does not exist", statusCode=500)
+        raise errorHandler("The specified profile does not exist", statusCode=404)
 
     #Apply a filter to evalu.targets to remove the deleted profile
     evalu.targets = list(filter(lambda p: p['id']!=id, evalu.targets))
@@ -97,7 +97,7 @@ def getProfile(id):
 
     #Raise error if specified id does not exists
     if not os.path.exists(filename):
-        raise errorHandler("The specified profile does not exist", statusCode=500)
+        raise errorHandler("The specified profile does not exist", statusCode=404)
         
     #Else, load the json data of the file
     jsonFile = open(filename)
@@ -125,7 +125,7 @@ def addProfile():
     #Get request body
     jsonProf = request.get_json(silent=True)
     if jsonProf is None:
-        raise errorHandler("No JSON gave", statusCode=404)
+        raise errorHandler("No JSON gave", statusCode=400)
 
     #Get request parameter representing the name/id of the loaded profile
     id = request.args.get('id', None)
@@ -137,10 +137,10 @@ def addProfile():
 
     #Check if filename already exists
     if(os.path.exists(filename)):
-        raise errorHandler("User ID already in use, choose another one", statusCode=500)
+        raise errorHandler("User ID already in use, choose another one", statusCode=400)
 
     with open(filename, 'w') as newJson:
-        json.dump(jsonProf, newJson)
+        json.dump(jsonProf, newJson, separators=(',\n\t', ':'))
 
 
     #Add the new json profile to the evaluator
@@ -148,7 +148,8 @@ def addProfile():
 
     evalu.targets.append({'id':id, 'data':dfT})
 
-    return jsonify({'message':'Profile added correctly','id':id})
+    #Return code 201 CREATED
+    return jsonify({'message':'Profile added correctly','id':id}), 201
 
 
 

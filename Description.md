@@ -385,9 +385,9 @@ A json representing an user profile
 > >
 > > >The returned value represents the similarity between 2 profiles, the higher the more similar are the 2 users
 > >
-> > **jaccard**, is used the Weighted Jaccard similarity
+> > **jaccard**, is used the Weighted Jaccard Distance
 > >
-> > >The returned value represents the similarity between 2 profiles, 1 means no differences
+> > >The returned value represents the similarity between 2 profiles, 0 means no differences
 
 
 
@@ -395,7 +395,14 @@ A json representing an user profile
 
 ```json
 {
-	"ID":"Roger",
+	"matches": [
+        {
+            "id":'roger'
+        },
+        {
+        	"id":'stefano'
+        }
+    ],
     "metric":"cosine",
     "similarity":0.897
 }
@@ -482,7 +489,7 @@ A json representing an user profile
     "Feudalism": 3,
     "Human_behaviour": 2,
     "2011_singles": 21,
-    "Primary_historical_works": 1,
+    "Primary_historical_works": 1
 }
 ```
 
