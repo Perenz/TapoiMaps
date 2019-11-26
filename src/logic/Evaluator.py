@@ -1,18 +1,68 @@
 import json
 import os
-import pandas as pd
-from numpy import argmax, argmin
-from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances, pairwise_distances
-from sklearn.preprocessing import normalize
+import math
+
+def normalizal2Dict(dic):
+    '''
+        Takes a dict and applies a l2 normalization on it
+
+        Returns the normalized dict
+    '''
+    norm = math.sqrt(sum(dic[k]**2 for k in dic))
+    normDict = {k:dic[k]/norm for k in dic}
+
+    return normDict
+
+def naiveMetric(x, y):  
+    '''
+    Callable function used to perform a naive similarity coefficent in the scikit pairwise_distances
+    '''
+    #Evaluate the l1 norm
+    xTw = sum(x[k] for k in x)
+    yTw = sum(y[k] for k in y)
+
+    # **2 gives more importance to the fact that both cited the same topic instead of how much they had talked about it
+    return sum(min(x.get(i,0)/xTw, y.get(i,0)/yTw) for i in set(x) | set(y))
+
+def cosineSim_norm(dic1, dic2):
+    '''
+    function used to perform a l2 normalized cosine similarity between two dict
+    '''
+    dic1 = normalizal2Dict(dic1)
+    dic2 = normalizal2Dict(dic2)
+
+    return sum(dic1.get(k,0)*dic2.get(k,0) for k in set(dic1) | set(dic2))
 
 
-def getTargetsDF():
+def weightedJaccard(x,y):
+    '''
+    function used to perform the weighted jaccard distance between two dict
+    '''
+    num=0
+    den=0
+
+    for k in set(x) | set(y):
+        num += min(x.get(k,0), y.get(k,0))
+        den += max(x.get(k,0), y.get(k,0))
+
+    #Avoid division by zero
+    return 1 - num/max(1,den)
+
+def normEuclidean(x,y):
+    '''
+    function used to perform the l2 normalized euclidean distance between two dict
+    '''
+    x=normalizal2Dict(x)
+    y=normalizal2Dict(y)
+
+    return math.sqrt(sum((x.get(k,0)-y.get(k,0))**2 for k in set(x) | set(y) ))
+
+def getTargets():
     '''
     Load the stored json files representing the user Profiles
     They are saved in pandas dataframes
     '''
     targets = []
-    df = pd.DataFrame()
     for file in os.listdir('./computedFiles'):
         if file.endswith('.json'):
             #print(file.split('.')[0])
@@ -23,42 +73,14 @@ def getTargetsDF():
                 data = json.loads(jsonStr)
             except json.JSONDecodeError:
                 data = None
-                
-            
+                           
             id = file.split('.')[0]
 
-            #Load the profile json in a dataframe
+            #Load the profile json in targets
             if not data is None:
-                dfT = pd.DataFrame(data, index=[id])
-
-                targets.append({'id':id, 'data':dfT})
+                targets.append({'id':id, 'data':data})
 
     return targets
-
-
-def naiveMetric(x, y):  
-    '''
-    Callable function used to perform a naive similarity coefficent in the scikit pairwise_distances
-    '''
-    xTw = sum(x)
-    yTw = sum(y)
-
-    # **2 gives more importance to the fact that both cited the same topic instead of how much they had talked about it
-    dist = sum(min(x[i]/xTw, y[i]/yTw) for i in range(len(x)))
-    return dist
-
-def weightedJaccard(x,y):
-    '''
-    Callable function used to perform the jaccard similarity in the scikit pairwise_distances
-    '''
-    num=0
-    den=0
-    for i in range(len(x)):
-        num += min(x[i],y[i])
-        den += max(x[i],y[i])
-
-    #Avoid division by zero
-    return 1 - num/max(1,den)
 
 
 class similarityEvaluator():
@@ -66,8 +88,8 @@ class similarityEvaluator():
     Class used to run different algorithms for the evaluation of a similarity value
     '''
     def __init__(self):
-        #Load all the files in a dataframe
-        self.targets = getTargetsDF()
+        #Load all the files in dicts
+        self.targets = getTargets()
 
     def computeCosineSimilarity(self, dfTest):
         '''
@@ -79,7 +101,7 @@ class similarityEvaluator():
         cosMat = []
         #For each target
         for t in self.targets:
-            cosMat.append(cosine_similarity(dfTest.append(t['data'], sort=False).fillna(0))[0,1])
+            cosMat.append(cosineSim_norm(dfTest, t['data']))
             
         #Get index of the max
         maxN = round(max(cosMat), 6)
@@ -97,7 +119,7 @@ class similarityEvaluator():
         '''
         eucMat = []
         for t in self.targets:
-            eucMat.append(euclidean_distances(normalize(dfTest.append(t['data'], sort=False).fillna(0)))[0,1])
+            eucMat.append(normEuclidean(dfTest, t['data']))
 
         #print(eucMat)
 
@@ -116,7 +138,7 @@ class similarityEvaluator():
         '''
         naiveMat = []
         for t in self.targets:
-            naiveMat.append(pairwise_distances(dfTest.append(t['data'], sort=False).fillna(0), metric=naiveMetric)[0,1])
+            naiveMat.append(naiveMetric(dfTest, t['data']))
 
         #print(naiveMat)
 
@@ -133,7 +155,7 @@ class similarityEvaluator():
         '''
         jacMat = []
         for t in self.targets:
-            jacMat.append(pairwise_distances(dfTest.append(t['data'], sort=False).fillna(0), metric=weightedJaccard)[0,1])
+            jacMat.append(weightedJaccard(dfTest, t['data']))
         
         minN = round(min(jacMat), 6)
         maxIDs = [self.targets[i]['id'] for i,j in enumerate(jacMat) if round(j, 6)==minN]

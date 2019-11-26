@@ -43,7 +43,6 @@ normedDict = {k:testDict[k]/normTest for k in testDict}
 
 distEmma = 0
 for k in set(emmaDict) & set(testDict):
-
     distEmma = distEmma + math.sqrt(((normedDict.get(k,0)-normedEmma.get(k,0)))**2)
 
 distRoger = 0

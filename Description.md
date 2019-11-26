@@ -23,16 +23,15 @@ Developed by [Stefano Perenzoni]('mailto:stefano.perenzoni@gmai.com']) while enr
 
 Perform the similarity evaluation between 2 profiles in a simple and 'brute-forced' way:
 ```python
-def metricFunc(x, y):
-        xTw = sum(x)
-        yTw = sum(y)
-        dist = sum(min(x[i]/xTw, y[i]/yTw)**2 for i in range(len(x)))
-        return dist
+def naiveMetric(x, y):
+        xTw = sum(x[k] for k in x)
+    	yTw = sum(y[k] for k in y)
+        return sum(min(x.get(i,0)/xTw, y.get(i,0)/yTw) for i in set(x) | set(y))
     
 def computeNaiveDist(self, testDF):
         naiveMat = []
-        for i in range(len(targetSDF):
-            naiveMat.append(pairwise_distances(dfTest.append(targetsDF[i], 					sort=False).fillna(0), metric=metricFunc)[0,1])
+        for i in targets:
+            naiveMat.append(naiveMetric(dfTest, t['data']))
 
         print(naiveMat)
 
@@ -63,8 +62,6 @@ Perform the similarity evaluation using the Normalized Euclidean distance and re
 Better accuracy can be obtained normalizing the vector x and y.
 
 I used a l2-normalization to keep the coefficients small
-
-So, for each profile, every topic reference counter was divided for the total number of references made by that user.
 
 
 #### Cons
@@ -118,8 +115,6 @@ Perform the similarity evaluation using the cosine similarity
 
 Since it measures the angle between the two profiles we don't worry about the length of the profiles but about the distance in which each profile points which is described from the topics the user talked about.
 
-It is similar to the Weighted Jaccard coefficient but the Cosine similarity can be  performed using the scikit library which returns better performances than the implementation of the Jaccard through a callable function.
-
 
 
 
@@ -127,20 +122,18 @@ It is similar to the Weighted Jaccard coefficient but the Cosine similarity can 
 
 | Distance Metric           | Calls # | Average time (s) * | Min time (s) | Max time (s) |
 | ------------------------- | ------- | ------------------ | ------------ | ------------ |
-| Cosine similarity         | 5       | 0.953              | 9.173        | 9.751        |
-| Weighted Jaccard distance | 5       | 1.080              | 1.040        | 1.105        |
-| Euclidean distance        | 5       | 0.949              | 9.107        | 9.663        |
-| Naive similarity          | 5       | 1,069              | 1,004        | 1,099        |
+| Cosine similarity         | 5       | 0.0230             | 0.0156       | 0.0284       |
+| Weighted Jaccard distance | 5       | 0.0230             | 0.0156       | 0.0369       |
+| Euclidean distance        | 5       | 0.0249             | 0.0120       | 0.0364       |
+| Naive similarity          | 5       | 0.0183             | 0.0221       | 0.0156       |
 
 *All the time values include debug printing and HTTP response-request operations
 
 
 
-We can easily observe that those evaluation performed using the scikit library are 10% more efficient than those that used a function self-defined.
+We can observe every metric returns restricted runtime values and they are all quite similar
 
-In addition to Cosine similarity's precision, as explained before, it results more efficient than the Jaccard's one, which is the slowest. Indeed it averages a time of 1.080 s, quite similar to the Naive algorithm which showed evidents problem, both under performances and precision.
-
-Although Euclidean distance had the best results in term of time, being a little bit better than Cosine similarity, this one gives more precise answers in term of profile matching since it doesn't have all the problems Euclidean algorithm presents which have been discussed before.
+Although Cosine similarity did not obtain the best result in term of performance, this one gives more precise answers in term of profile matching since it doesn't have all the problems that others present which have been discussed before.
 
 
 
@@ -182,11 +175,9 @@ The application of the algorithms over these two profiles would obviously return
 
 ![Euclidean distance](./images/wikistruct.png)
 
-
+All of this can be used as a kind of conceptual similarity.
 
 This can result as a big improvement for the similarity coefficient  because the new algorithms would catch matches that the older wouldn't get.  On the other hand this elaboration "removes" specific information from a user since the detailed given data describing a discussed and detailed category is analyzed and new wider general insights are extracted. These general information, which has been generated changing the specific nature of a profile, should bring an improvement in the similarity coefficient.
-
-All of these can be used as a kind of conceptual similarity.
 
 So this pre-elaboration helps the matching algorithm but its use is recommended depending on the detail level we want for our profiles.
 
@@ -334,7 +325,7 @@ I would rather use systems designed for document store which compose one of the 
 I will focus on two of the most famous DBMS from the mentioned class: MongoDB and CouchDB. The two differs in several aspects, starting from the DB structure. CouchDB stores JSON format offering CRUD operations above them, MongoDB use a less strict structure allowing schema-free data storing in a binary format, so documents are not required to have a predefined structure so different documents in the collection can have different columns; a feature that fits perfectly for our system. While CouchDB achieves scalability through master-slave replication (The master perform the writes and then passes the updated information to the slaves which can perform read anytime) MongoDB does it horizontally supporting automatic sharding, distributing documents over servers and uses replication just for failover.
 MongoDB provides faster read speeds and it is the better choice for a rapidly growing database that could be our case because of the profiles' size so i would recommend it more than CouchDB.
 
-A third alternative would be that of adopting a graph database storing each profile and each category as a single node; references from an user for a specific topic could be represented using weighted edges. Scalability is usually great for these types of graphs and they are much more adequate to handle changing data with evolutionary pattern. On the contrary Relational and NoSQL DBMS are typically faster in performing the same operations on a large number of data.
+A third alternative would be that of adopting a graph database storing each profile and each category as a single node; references from an user for a specific topic could be represented using weighted edges. Scalability is usually great for these types of graphs and they are much more adequate to handle changing data with evolutionary pattern. On the contrary, Relational and NoSQL DBMS are typically faster in performing the same operations on a large number of data.
 
 <hr><hr>
 
@@ -343,7 +334,7 @@ A third alternative would be that of adopting a graph database storing each prof
 ## Get ID of the most similar profile
 
 It takes a JSON object representing a user profile and perform the evaluation of the similarity coefficient  for  every profile stored previously.
-The ID of the most similar is returned with the value of the similarity associated
+The IDs of the most similar profiles are returned with the value of the similarity associated
 
 **URL: ** /similarity
 

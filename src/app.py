@@ -1,10 +1,10 @@
 import flask
 import os
 import json
-from flask import jsonify, Flask, request, make_response, abort
+from flask import jsonify, Flask, request
 import sys
+import time
 from flask_cors import CORS
-import pandas as pd
 from logic import Evaluator
 
 app = flask.Flask(__name__)
@@ -47,6 +47,7 @@ def getErr():
 
 @app.route('/similarity', methods=['GET'])
 def similarity():
+    start = time.time()
     id = None
     #Get alg parameter from request url
     algorithm = request.args.get('alg', 'cosine')
@@ -57,16 +58,18 @@ def similarity():
         raise errorHandler("No JSON gave", statusCode=400)
 
     #Based on the alg parameter run a similarity evaluation algorithm
-    if algorithm == '': id, simValue = evalu.computeCosineSimilarity(pd.DataFrame(jsonReq, index=['test'])) 
-    if algorithm == 'jaccard': id, simValue = evalu.computeJaccardDist(pd.DataFrame(jsonReq, index=['test'])) 
-    if algorithm == 'cosine': id, simValue = evalu.computeCosineSimilarity(pd.DataFrame(jsonReq, index=['test'])) 
-    if algorithm == 'euclidean': id, simValue = evalu.computeEuclideanDist(pd.DataFrame(jsonReq, index=['test'])) 
-    if algorithm == 'naive': id, simValue = evalu.computeNaiveDist(pd.DataFrame(jsonReq, index=['test'])) 
+    if algorithm == '': id, simValue = evalu.computeCosineSimilarity(jsonReq) 
+    if algorithm == 'jaccard': id, simValue = evalu.computeJaccardDist(jsonReq) 
+    if algorithm == 'cosine': id, simValue = evalu.computeCosineSimilarity(jsonReq) 
+    if algorithm == 'euclidean': id, simValue = evalu.computeEuclideanDist(jsonReq) 
+    if algorithm == 'naive': id, simValue = evalu.computeNaiveDist(jsonReq) 
 
     #If alg param didn't match any of the previous, return error
     if id is None:
         raise errorHandler('Invalid alg parameter', statusCode=404)
 
+    end= time.time()
+    print(f'Tempo {algorithm}: {end-start}')
     #Else return response to the client
     return jsonify({'matches':[{'id':i} for i in id], 'metric':algorithm, 'value':round(simValue,3)})
 
@@ -144,9 +147,8 @@ def addProfile():
 
 
     #Add the new json profile to the evaluator
-    dfT = pd.DataFrame(jsonProf, index=[id])
 
-    evalu.targets.append({'id':id, 'data':dfT})
+    evalu.targets.append({'id':id, 'data':jsonProf})
 
     #Return code 201 CREATED
     return jsonify({'message':'Profile added correctly','id':id}), 201

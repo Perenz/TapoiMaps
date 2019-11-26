@@ -5,11 +5,7 @@ itsdangerous
 Jinja2
 joblib
 MarkupSafe
-pandas
 python-dateutil
 pytz
-scikit-learn
-scipy
 six
-sklearn
 Werkzeug
