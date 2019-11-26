@@ -9,5 +9,5 @@
 
 <hr>
 
-Developed by [Stefano Perenzoni]('mailto:stefano.perenzoni@gmai.com']) while enrolled at [Univerisity of Trento]( https://www.unitn.it/ )
+Developed by [Stefano Perenzoni](mailto:stefano.perenzoni@gmai.com) while enrolled at [Univerisity of Trento]( https://www.unitn.it/ ) as exercise for an interview at [U-Hopper](https://www.u-hopper.com/big-data-analytics/site/index/it)
 
