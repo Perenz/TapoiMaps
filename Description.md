@@ -9,7 +9,7 @@
 
 <hr>
 
-Developed by [Stefano Perenzoni]('mailto:stefano.perenzoni@gmai.com']) while enrolled at [Univerisity of Trento]( https://www.unitn.it/ )
+Developed by [Stefano Perenzoni](mailto:stefano.perenzoni@gmai.com) while enrolled at [Univerisity of Trento]( https://www.unitn.it/ ) as exercise for an interview at [U-Hopper](https://www.u-hopper.com/big-data-analytics/site/index/it)
 
 
 
@@ -36,7 +36,7 @@ def computeNaiveDist(self, testDF):
         print(naiveMat)
 
         ind = argmax(naiveMat)
-        return targetDF.id, naiveMat[ind]
+        return targetDF[ind].id, naiveMat[ind]
 ```
 
 Each value of both vectors is l1 "normalized" with the number of references for that profile so they are weighted and their value is relative to that profile.
@@ -47,8 +47,8 @@ A fixed real coefficient can be used to give more value to the fact that the two
 
 #### Cons
 
-The longer a profile is the higher will be the similarity since the probability of same topics discussion increases.
-It doesn't give any value to different topics discussed by different profiles
+The longer a profile is the higher will be the similarity since the probability of same topics discussion increases. In addition, the minimum between the two profiles doesn't guarantee a good precision.
+It doesn't give any value to different topics discussed by different profiles.
 
 
 
@@ -78,7 +78,7 @@ P3 and P4 (7 common categories) must be more similar to each other than P1 and P
 
 ## Weighted Jaccard distance
 
-Treating the user profile as a set allows us to apply the Jaccard similarity coefficient which is used to obtain the Jaccard distance that measures dissimilarity betweem two sets.
+Treating the user profile as a set allows us to apply the Jaccard similarity coefficient which is used to obtain the Jaccard distance that measures dissimilarity between two sets.
 
 ![Euclidean distance](./images/jaccard.svg)
 

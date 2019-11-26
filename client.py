@@ -13,13 +13,13 @@ targetJson = json.loads(jsonStr)
 # http://127.0.0.1:5000/similarity?alg=jaccard
 r = requests.get('http://127.0.0.1:5000/similarity?alg=cosine', json=targetJson)
 
-r = requests.get('http://127.0.0.1:5000/profiles')
+#r = requests.get('http://127.0.0.1:5000/profiles')
 
-r = requests.get('http://127.0.0.1:5000/profiles/tim')
+#r = requests.get('http://127.0.0.1:5000/profiles/prova')
 
-r = requests.post('http://127.0.0.1:5000/profiles?id=prova', json=targetJson)
+#r = requests.post('http://127.0.0.1:5000/profiles?id=prova', json=targetJson)
 
-r = requests.delete('http://127.0.0.1:5000/profiles?id=prova')
+#r = requests.delete('http://127.0.0.1:5000/profiles?id=prova')
 
 
 resp = r.json()

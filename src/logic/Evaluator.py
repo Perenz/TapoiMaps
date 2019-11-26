@@ -55,12 +55,12 @@ def normEuclidean(x,y):
     x=normalizal2Dict(x)
     y=normalizal2Dict(y)
 
-    return math.sqrt(sum((x.get(k,0)-y.get(k,0))**2 for k in set(x) | set(y) ))
+    return math.sqrt(sum((x.get(k,0)-y.get(k,0))**(1/2) for k in set(x) | set(y) ))
 
 def getTargets():
     '''
     Load the stored json files representing the user Profiles
-    They are saved in pandas dataframes
+    They are saved in dictionaries
     '''
     targets = []
     for file in os.listdir('./computedFiles'):
@@ -121,8 +121,6 @@ class similarityEvaluator():
         for t in self.targets:
             eucMat.append(normEuclidean(dfTest, t['data']))
 
-        #print(eucMat)
-
         minN = round(min(eucMat), 6)
         maxIDs = [self.targets[i]['id'] for i,j in enumerate(eucMat) if round(j, 6)==minN]
 
@@ -139,8 +137,6 @@ class similarityEvaluator():
         naiveMat = []
         for t in self.targets:
             naiveMat.append(naiveMetric(dfTest, t['data']))
-
-        #print(naiveMat)
 
         maxN = round(max(naiveMat), 6)
         maxNames = [self.targets[i]['id'] for i,j in enumerate(naiveMat) if round(j, 6)==maxN]

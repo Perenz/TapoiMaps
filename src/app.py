@@ -2,7 +2,6 @@ import flask
 import os
 import json
 from flask import jsonify, Flask, request
-import sys
 import time
 from flask_cors import CORS
 from logic import Evaluator
@@ -16,8 +15,6 @@ evalu = Evaluator.similarityEvaluator()
 #There, in the init i can load the files
 
 class errorHandler(Exception):
-    status_code = 400
-
     def __init__(self, message, statusCode = None):
         self.message = message
         if statusCode is not None:
@@ -140,7 +137,7 @@ def addProfile():
 
     #Check if filename already exists
     if(os.path.exists(filename)):
-        raise errorHandler("User ID already in use, choose another one", statusCode=400)
+        raise errorHandler("User ID already in use, choose another one", statusCode=409)
 
     with open(filename, 'w') as newJson:
         json.dump(jsonProf, newJson, separators=(',\n\t', ':'))
