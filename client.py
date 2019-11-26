@@ -3,7 +3,7 @@ import json
 
 
 
-jsonFile = open('./computedFiles/roger.json')
+jsonFile = open('./testFiles/testRoger.json')
 jsonStr = jsonFile.read()
 targetJson = json.loads(jsonStr)
 

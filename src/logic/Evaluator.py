@@ -21,8 +21,8 @@ def naiveMetric(x, y):
     xTw = sum(x[k] for k in x)
     yTw = sum(y[k] for k in y)
 
-    # **2 gives more importance to the fact that both cited the same topic instead of how much they had talked about it
-    return sum(min(x.get(i,0)/xTw, y.get(i,0)/yTw) for i in set(x) | set(y))
+    # **1/2 gives more importance to the fact that both cited the same topic instead of how much they had talked about it
+    return sum(min(x.get(i,0)/xTw, y.get(i,0)/yTw)**(1/2) for i in set(x) | set(y))
 
 def cosineSim_norm(dic1, dic2):
     '''
@@ -46,7 +46,7 @@ def weightedJaccard(x,y):
         den += max(x.get(k,0), y.get(k,0))
 
     #Avoid division by zero
-    return 1 - num/max(1,den)
+    return num/max(1,den)
 
 def normEuclidean(x,y):
     '''
@@ -55,7 +55,7 @@ def normEuclidean(x,y):
     x=normalizal2Dict(x)
     y=normalizal2Dict(y)
 
-    return math.sqrt(sum((x.get(k,0)-y.get(k,0))**(1/2) for k in set(x) | set(y) ))
+    return math.sqrt(sum((x.get(k,0)-y.get(k,0))**2 for k in set(x) | set(y)))
 
 def getTargets():
     '''
@@ -121,6 +121,7 @@ class similarityEvaluator():
         for t in self.targets:
             eucMat.append(normEuclidean(dfTest, t['data']))
 
+
         minN = round(min(eucMat), 6)
         maxIDs = [self.targets[i]['id'] for i,j in enumerate(eucMat) if round(j, 6)==minN]
 
@@ -138,6 +139,8 @@ class similarityEvaluator():
         for t in self.targets:
             naiveMat.append(naiveMetric(dfTest, t['data']))
 
+        print(naiveMat)
+
         maxN = round(max(naiveMat), 6)
         maxNames = [self.targets[i]['id'] for i,j in enumerate(naiveMat) if round(j, 6)==maxN]
         return maxNames, maxN
@@ -152,10 +155,12 @@ class similarityEvaluator():
         jacMat = []
         for t in self.targets:
             jacMat.append(weightedJaccard(dfTest, t['data']))
+
+        print(jacMat)
         
-        minN = round(min(jacMat), 6)
-        maxIDs = [self.targets[i]['id'] for i,j in enumerate(jacMat) if round(j, 6)==minN]
+        maxN = round(max(jacMat), 6)
+        maxIDs = [self.targets[i]['id'] for i,j in enumerate(jacMat) if round(j, 6)==maxN]
       
 
-        return maxIDs, minN
+        return maxIDs, maxN
 
